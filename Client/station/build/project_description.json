@@ -1,7 +1,7 @@
 {
     "version":            "1",
     "project_name":       "wifi_station",
-    "project_version":    "c7976d7",
+    "project_version":    "9a4519d-dirty",
     "project_path":       "C:/Users/Pither/Desktop/LEDCOSY/Client/station",
     "idf_path":           "C:/Users/Pither/esp/esp-idf",
     "build_dir":          "C:/Users/Pither/Desktop/LEDCOSY/Client/station/build",
