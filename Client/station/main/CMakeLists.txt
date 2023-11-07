@@ -1,2 +1,2 @@
-idf_component_register(SRCS "station_example_main.c"
+idf_component_register(SRCS "wifi_connection.c"
                     INCLUDE_DIRS ".")
