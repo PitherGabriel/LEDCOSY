@@ -20,7 +20,7 @@ class sensor_table(db.Model):
     humidity = db.Column(db.Float)
     co2 = db.Column(db.Float)
 
-@app.route('/home')
+@app.route('/')
 def home():
     return "It's Home"
 
