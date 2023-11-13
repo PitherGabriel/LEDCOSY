@@ -1,10 +1,8 @@
-from flask import Flask, request, jsonify, render_template
-import requests
+from flask import Flask, request, jsonify, render_template, Response
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import json
 from datetime import datetime
-
+import time
 app = Flask(__name__)
 
 # Initialize app
@@ -19,6 +17,15 @@ class sensor_table(db.Model):
     temperature = db.Column(db.Float)
     humidity = db.Column(db.Float)
     co2 = db.Column(db.Float)
+
+# Define event for checking 
+def event_stream():
+    while True:
+        # Fetch command from database or wherever it's stored
+        #command = fetch_command()
+        #yield f"data: {json.dumps(command)}\n\n"
+        time.sleep(10)  # Sleep for 10 seconds
+
 
 @app.route('/')
 def home():
@@ -50,7 +57,11 @@ def receive_data():
 @app.route('/send_command', methods=['POST'])
 def send_commmand():
     return "Inside Send Command Route"
-    
+
+@app.route('/stream')
+def stream():
+    return Response(event_stream(), mimetype="text/event-stream")
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()  # Create the database table
