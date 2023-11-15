@@ -1,1 +1,0 @@
-void init_i2c(void);
