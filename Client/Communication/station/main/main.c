@@ -2,11 +2,13 @@
 #include "wifi_connection.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "scd30.h"
 #include "esp_log.h"
 #include "esp_err.h"
 #include "driver/i2c.h"
 #include "string.h"
+#include "scd30.h"
+#include "iot_servo.h"
+
 static const char* TAG = "app_main";
 
 #ifndef APP_CPU_NUM
@@ -15,6 +17,15 @@ static const char* TAG = "app_main";
 
 #define I2C_MASTER_SCL_IO           22      /*!< GPIO number used for I2C master clock */
 #define I2C_MASTER_SDA_IO           21      /*!< GPIO number used for I2C master data  */
+
+#define SERVO_CH8_PIN 2
+#define SERVO_CH9_PIN 0
+#define SERVO_CH10_PIN 4
+#define SERVO_CH11_PIN 5
+#define SERVO_CH12_PIN 18
+#define SERVO_CH13_PIN 19
+#define SERVO_CH14_PIN 21
+#define SERVO_CH15_PIN 22
 
 // static const char* jsonSensorData = "{"
 //     "\"temperature\":"+ String(temperature)+",
@@ -39,13 +50,15 @@ void task(void *pvParameters)
     //ESP_LOGI(TAG, "Starting continuous measurement");
     //ESP_ERROR_CHECK(scd30_trigger_continuous_measurement(&dev, 0));
     ESP_LOGI(TAG, "Starting measurement");
-    const TickType_t xDelay = 5000 / portTICK_PERIOD_MS;
+    const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
     float co2, temperature, humidity;
     bool data_ready;
+    float angle = 100.0f;
     while (1)
     {
         vTaskDelay(xDelay);
         scd30_get_data_ready_status(&dev, &data_ready);
+        iot_servo_write_angle(LEDC_HIGH_SPEED_MODE,0, angle);
 
         if (data_ready)
         {
@@ -69,9 +82,38 @@ void task(void *pvParameters)
     }
 }
 
+servo_config_t servo_cfg = {
+.max_angle = 360,
+.min_width_us = 500,
+.max_width_us = 2500,
+.freq = 100,
+.timer_number = LEDC_TIMER_0,
+.channels = {
+.servo_pin = {  SERVO_CH8_PIN,
+                SERVO_CH9_PIN,
+                SERVO_CH10_PIN,
+                SERVO_CH11_PIN,
+                SERVO_CH12_PIN,
+                SERVO_CH13_PIN,
+                SERVO_CH14_PIN,
+                SERVO_CH15_PIN,},
+
+.ch = {         LEDC_CHANNEL_0,
+                LEDC_CHANNEL_1,
+                LEDC_CHANNEL_2,
+                LEDC_CHANNEL_3,
+                LEDC_CHANNEL_4,
+                LEDC_CHANNEL_5,
+                LEDC_CHANNEL_6,
+                LEDC_CHANNEL_7,},
+},
+.channel_number = 8,
+} ;
+
 void app_main(void)
 {
     connect_wifi();
     ESP_ERROR_CHECK(i2cdev_init());
+    iot_servo_init(LEDC_HIGH_SPEED_MODE, &servo_cfg);
     xTaskCreatePinnedToCore(task, "test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
 }              
