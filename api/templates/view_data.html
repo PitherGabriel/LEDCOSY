@@ -17,7 +17,7 @@
         {% for item in data %}
         <tr>
             <td>{{ item.id }}</td>
-            <td>{{ item.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>{{ item.timestamp.strftime('%d/%m/%Y %H:%M:%S ') }}</td>
             <td>{{ item.temperature }}</td>
             <td>{{ item.humidity }}</td>
             <td>{{ item.co2 }}</td>
