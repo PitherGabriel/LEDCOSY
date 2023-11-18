@@ -1,7 +1,7 @@
 {
     "version":            "1",
     "project_name":       "ESP32_Client",
-    "project_version":    "f229e52-dirty",
+    "project_version":    "59b9d69-dirty",
     "project_path":       "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station",
     "idf_path":           "C:/Users/Pither/esp/esp-idf",
     "build_dir":          "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/build",

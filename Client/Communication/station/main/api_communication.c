@@ -7,6 +7,7 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #include <string.h>
+#include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -25,18 +26,25 @@
 
 static const char *TAG = "API Communication";
 
-static const char* JSON_DATA ="{"
-    "\"temperature\": 25.5,"
-    "\"humidity\": 60.0,"
-    "\"co2\": 400"
-"}";
+#define REQUEST_LENGTH 400
+#define WEB_PATH_LENGTH 80
 
-static const char *REQUEST = "POST  " WEB_PATH " HTTP/1.1\r\n"
+static const char* GET_PREFIX = "GET ";
+static const char* POST_PREFIX = "POST ";
+
+static const char* HTTP_REQUEST_SUFFIX = " HTTP/1.1\r\n"
     "Host: "WEB_SERVER":"WEB_PORT"\r\n"
-    "User-Agent: esp-idf/1.0 esp32\r\n"
-    "\r\n";
+    "User-Agent: esp-idf/1.0 esp32\r\n";
 
-static void http_post_task(void *pvParameters)
+static const char* JSON_CONTENT_SUFFIX = "Content-Type: application/json\r\n"
+                                         "Content-Length: ";
+
+char request[REQUEST_LENGTH];
+char web_path[WEB_PATH_LENGTH];
+
+
+
+static void http_get_task(void *pvParameters)
 {
     const struct addrinfo hints = {
         .ai_family = AF_INET,
@@ -82,7 +90,7 @@ static void http_post_task(void *pvParameters)
         ESP_LOGI(TAG, "... connected");
         freeaddrinfo(res);
 
-        if (write(s, REQUEST, strlen(REQUEST)) < 0) {
+        if (write(s, request, strlen(request)) < 0) {
             ESP_LOGE(TAG, "... socket send failed");
             close(s);
             vTaskDelay(4000 / portTICK_PERIOD_MS);
@@ -113,25 +121,58 @@ static void http_post_task(void *pvParameters)
 
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
-        for(int countdown = 10; countdown >= 0; countdown--) {
-            ESP_LOGI(TAG, "%d... ", countdown);
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
-        ESP_LOGI(TAG, "Starting again!");
+        vTaskDelete(NULL);
     }
 }
 
-// void app_main(void)
-// {
-//     ESP_ERROR_CHECK( nvs_flash_init() );
-//     ESP_ERROR_CHECK(esp_netif_init());
-//     ESP_ERROR_CHECK(esp_event_loop_create_default());
+void encode_sensor_data(char *buffer, float temp, float hum, float co2){
+    sprintf(buffer, "{\"temperature\":%.2f,\"humidity\":%.2f,\"co2\":%.2f}", temp, hum, co2);
+}
 
-//     /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-//      * Read "Establishing Wi-Fi or Ethernet Connection" section in
-//      * examples/protocols/README.md for more information about this function.
-//      */
-//     ESP_ERROR_CHECK(example_connect());
+ void http_send_data(float temp, float hum, float co2)
+{
+    // Reset request and web path memory
+    memset(request, 0, REQUEST_LENGTH);
+    memset(web_path,0, WEB_PATH_LENGTH);
+    // Buffer for JSON data
+    char json_data[100];
 
-//     xTaskCreate(&http_post_task, "http_post_task", 4096, NULL, 5, NULL);
-// }
+    //Encode sensor data
+    encode_sensor_data(json_data, temp, hum, co2);
+    //
+    int json_size_bytes = strlen(json_data);
+    char jsonsize_str[5];
+    itoa(json_size_bytes, jsonsize_str, 10);   
+
+    strcpy(request, POST_PREFIX);
+    strcpy(web_path, SENSOR_PREFIX_PATH);
+
+    strcat(request, web_path);
+    strcat(request, HTTP_REQUEST_SUFFIX);
+    strcat(request, JSON_CONTENT_SUFFIX);
+    strcat(request,jsonsize_str);
+    strcat(request, "\r\n");
+    strcat(request, "\r\n");
+    strcat(request, json_data);
+
+    printf(request);
+
+    xTaskCreate(&http_get_task, "http_post_task", 4096, NULL, 5, NULL);
+ }
+
+ void http_request_command(void){
+
+    // Reset request and web path memory
+    memset(request, 0, REQUEST_LENGTH);
+    memset(web_path,0, WEB_PATH_LENGTH);
+    
+    strcpy(request, GET_PREFIX);
+    strcpy(web_path, FORECASTING_PREFIX_PATH);
+
+    strcat(request,web_path);
+    strcat(request,HTTP_REQUEST_SUFFIX);
+
+    printf(request);
+
+    xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
+ }
