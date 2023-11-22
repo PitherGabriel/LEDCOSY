@@ -8,15 +8,18 @@
 */
 #include <string.h>
 #include <stdio.h>
+#include "api_communication.h"
+#include "servo.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
+#include "esp_sleep.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include "api_communication.h"
-
+#include <sys/time.h> 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
@@ -42,10 +45,11 @@ static const char* JSON_CONTENT_SUFFIX = "Content-Type: application/json\r\n"
 char request[REQUEST_LENGTH];
 char web_path[WEB_PATH_LENGTH];
 
+//static RTC_DATA_ATTR struct timeval sleep_enter_time;
 
-
-static void http_get_task(void *pvParameters)
+static void http_get_task(void *pvParameter)
 {
+    int *pvSignal = pvParameter;
     const struct addrinfo hints = {
         .ai_family = AF_INET,
         .ai_socktype = SOCK_STREAM,
@@ -56,7 +60,8 @@ static void http_get_task(void *pvParameters)
     char recv_buf[64];
 
     while(1) {
-        int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
+        
+            int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
 
         if(err != 0 || res == NULL) {
             ESP_LOGE(TAG, "DNS lookup failed err=%d res=%p", err, res);
@@ -121,9 +126,22 @@ static void http_get_task(void *pvParameters)
 
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
-        vTaskDelete(NULL);
+        if (pvSignal)
+        {
+            /*Skip deep sleep and move servo*/
+            move_servo();    
+            vTaskDelete(NULL);
+        }
+        else 
+        {
+            /*Enter deep sleep mode*/
+            printf("Entering deep sleep...\n");
+            //gettimeofday(&sleep_enter_time,NULL);
+            esp_deep_sleep_start();
+        }        
+        
     }
-}
+        }
 
 void encode_sensor_data(char *buffer, float temp, float hum, float co2){
     sprintf(buffer, "{\"temperature\":%.2f,\"humidity\":%.2f,\"co2\":%.2f}", temp, hum, co2);
@@ -156,11 +174,13 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
     strcat(request, json_data);
 
     printf(request);
+    printf("\n");
 
     xTaskCreate(&http_get_task, "http_post_task", 4096, NULL, 5, NULL);
  }
 
  void http_request_command(void){
+    int get_signal = 1;
 
     // Reset request and web path memory
     memset(request, 0, REQUEST_LENGTH);
@@ -174,5 +194,5 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
 
     printf(request);
 
-    xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
+    xTaskCreate(&http_get_task, "http_get_task", 4096, (void*)&get_signal, 5, NULL);
  }

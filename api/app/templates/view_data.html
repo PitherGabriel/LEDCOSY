@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Data</title>
+</head>
+<body>
+    <h1>Data from Database</h1>
+    <table>
+        <tr>
+            <th>id</th>
+            <th>timestamp</th>
+            <th>temperature</th>
+            <th>humidity</th>
+            <th>co2</th>
+            <!-- Add more table headers as needed for your data columns -->
+        </tr>
+        {% for item in data %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.timestamp.strftime('%d/%m/%Y %H:%M:%S ') }}</td>
+            <td>{{ item.temperature }}</td>
+            <td>{{ item.humidity }}</td>
+            <td>{{ item.co2 }}</td>
+            <!-- Add more table data cells for additional columns -->
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

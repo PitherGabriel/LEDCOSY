@@ -12,6 +12,9 @@
     "stdio.h": "c",
     "esp_log.h": "c",
     "ledc.h": "c",
-    "gpio.h": "c"
+    "gpio.h": "c",
+    "err.h": "c",
+    "time.h": "c",
+    "task.h": "c"
   }
 }
