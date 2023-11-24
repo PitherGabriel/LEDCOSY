@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
-LSTM_PATH = 'app/LSTM/MultiStepeModel.sav'
+LSTM_PATH = 'app/LSTM/lstm_model.h5'
 
 def create_app():
     app = Flask(__name__)

@@ -2,6 +2,7 @@
 #include "wifi_connection.h"
 #include "sensor.h"
 #include <stdio.h>
+#include "servo.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -12,7 +13,6 @@
 #include "driver/rtc_io.h"
 #include <sys/time.h> 
 #include "string.h"
-#include "iot_servo.h"
 
 static const char* TAG = "app_main";
 
@@ -24,10 +24,12 @@ static RTC_DATA_ATTR struct timeval sleep_enter_time;
 RTC_DATA_ATTR int wakeup_counter = 0;
 /*Function prototypes*/
 void wakeup_reason(void);
+void test_servo(void);
 
 
 void app_main(void)
 {
+    test_servo();
     /*Sleep time*/
     //struct timeval now;
     //gettimeofday(&now, NULL);
@@ -70,4 +72,9 @@ void wakeup_reason(void){
         default:
             printf("Not a deep sleep reset\n");
     }
+}
+
+void test_servo(void){
+    ESP_LOGI(TAG, "Test servo called.\n");
+    move_servo();
 }

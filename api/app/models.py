@@ -1,6 +1,6 @@
 from app import db
+from keras.models import load_model
 from datetime import datetime
-import pickle
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
@@ -30,7 +30,7 @@ class LSTMModel:
     def __init__(self):
         self.model = None 
     def load_model(self, model_path):
-        self.model = pickle.load(open(model_path, 'rb'))
+        self.model = load_model(model_path)
 
     def predict(self, input_data):
         # Scale data
