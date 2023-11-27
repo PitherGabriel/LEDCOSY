@@ -136,7 +136,6 @@ static void http_get_task(void *pvParameter)
         {
             /*Enter deep sleep mode*/
             printf("Entering deep sleep...\n");
-            //gettimeofday(&sleep_enter_time,NULL);
             esp_deep_sleep_start();
         }        
         
@@ -181,6 +180,14 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
 
  void http_request_command(void){
     int get_signal = 1;
+    //float gain=0;
+    //int action=0;
+    
+    char json_request[50] = "{\"action\":\"gain\"}";
+
+    int json_size_bytes = strlen(json_request);
+    char jsonsize_str[5];
+    itoa(json_size_bytes, jsonsize_str, 10);   
 
     // Reset request and web path memory
     memset(request, 0, REQUEST_LENGTH);
@@ -191,8 +198,15 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
 
     strcat(request,web_path);
     strcat(request,HTTP_REQUEST_SUFFIX);
+    strcat(request, JSON_CONTENT_SUFFIX);
+    strcat(request,jsonsize_str);
+    strcat(request, "\r\n");
+    strcat(request, "\r\n");
+    strcat(request, json_request);
+
 
     printf(request);
+    printf("\n");
 
     xTaskCreate(&http_get_task, "http_get_task", 4096, (void*)&get_signal, 5, NULL);
  }

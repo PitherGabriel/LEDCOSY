@@ -1,29 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>View Data</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization</title>
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* Add custom styling */
+        body {
+            padding-top: 50px; /* Adjust as needed */
+        }
+
+        .table-container {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Data from Database</h1>
-    <table>
-        <tr>
-            <th>id</th>
-            <th>timestamp</th>
-            <th>temperature</th>
-            <th>humidity</th>
-            <th>co2</th>
-            <!-- Add more table headers as needed for your data columns -->
-        </tr>
-        {% for item in data %}
-        <tr>
-            <td>{{ item.id }}</td>
-            <td>{{ item.timestamp.strftime('%d/%m/%Y %H:%M:%S ') }}</td>
-            <td>{{ item.temperature }}</td>
-            <td>{{ item.humidity }}</td>
-            <td>{{ item.co2 }}</td>
-            <!-- Add more table data cells for additional columns -->
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Sensor Data -->
+            <div class="col-md-4 table-container">
+                <h2 class="mb-4">Sensor Data</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>Temperature</th>
+                            <th>Humidity</th>
+                            <th>CO2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in sensor_data %}
+                            <tr>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.timestamp }}</td>
+                                <td>{{ row.temperature }}</td>
+                                <td>{{ row.humidity }}</td>
+                                <td>{{ row.co2 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Forecasting Data -->
+            <div class="col-md-4 table-container">
+                <h2 class="mb-4">Forecasting Data</h2>
+                <table class="table table-bordered">
+                    <!-- Repeat similar structure for forecasting_data -->
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and Popper.js scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

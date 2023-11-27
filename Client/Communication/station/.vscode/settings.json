@@ -15,6 +15,10 @@
     "gpio.h": "c",
     "err.h": "c",
     "time.h": "c",
-    "task.h": "c"
+    "task.h": "c",
+    "esp_sleep.h": "c",
+    "gpio_types.h": "c",
+    "soc_caps.h": "c",
+    "touch_sensor_types.h": "c"
   }
 }

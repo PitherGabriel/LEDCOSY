@@ -9,18 +9,6 @@
 
 static const char *TAG = "Servo";
 
-void servo_task(void *pvParameter){
-
-    printf("Move servo task called\n");
-    while (1)
-    {
-        printf("Entering deep sleep...\n");
-        //gettimeofday(&sleep_enter_time,NULL);
-        esp_deep_sleep_start();
-    }
-
-}
-
 void move_servo(void){
     ESP_LOGI(TAG,"Create timer and operator");
     mcpwm_timer_handle_t timer = NULL;
@@ -72,7 +60,7 @@ void move_servo(void){
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
 
     int angle = 0;
-    int step = 5;
+    int step = 2;
     while (1) {
     ESP_LOGI(TAG, "Angle of rotation: %d", angle);
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
@@ -84,6 +72,7 @@ void move_servo(void){
         }
         angle += step;
     }
-    
-    //xTaskCreate(&servo_task, "servo_task",4096, NULL, 5, NULL);
+
+    //printf("Entering deep sleep...\n");
+    //esp_deep_sleep_start();
 }

@@ -4,28 +4,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Sensor App</title>
+    <title>Your Flask App</title>
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-
-    <header>
-        <h1>Welcome to COSY, system to predict CO2 and control illumination</h1>
-    </header>
-
-    <main>
-        <p>This is the main page of your Flask application.</p>
-        <p>Explore the following links:</p>
-        
-        <ul>
-            <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('view_data') }}">View Sensor Data</a></li>
-            <li><a href="{{ url_for('predict_data') }}">Predicted Data</a></li>
+    <div class="container mt-5">
+        <h1 class="mb-4">Index</h1>
+        <ul class="list-group">
+            <!-- Add links to other routes as needed -->
+            <li class="list-group-item"><a href="{{ url_for('api.viewdata') }}">Visualize Data</a></li>
         </ul>
-    </main>
+    </div>
 
-    <footer>
-        <p>&copy; 2023 Your Flask Sensor App</p>
-    </footer>
-
+    <!-- Add Bootstrap JS and Popper.js scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
