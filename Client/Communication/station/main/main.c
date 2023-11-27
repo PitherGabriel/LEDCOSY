@@ -15,11 +15,10 @@
 #include "string.h"
 
 static const char* TAG = "app_main";
-
-#define SLEEP_TIME                  3600   /*Sleep time in sec*/
 #define GET_COMMAND_RESET            6   /*Number of wakes for controlling LED*/
 /*Variable definition*/
 RTC_DATA_ATTR int wakeup_counter = 0;
+long DEEP_SLEEP_TIME_SEC = 1800;   /*Sleep time in sec*/
 /*Function prototypes*/
 void wakeup_reason(void);
 void test_servo(void);
@@ -45,17 +44,17 @@ void app_main(void)
 
     /*Enable timer wakeup resource*/
     ESP_LOGI(TAG, "Enabling timer wakeup resource...");
-    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(SLEEP_TIME*1000000));
-    test_command();
-    // /*Checking whether to request command for adjusting LED light or keep sending sensor data*/
-    // if (wakeup_counter == GET_COMMAND_RESET)
-    // {
-    //     /*Reset counter*/
-    //     wakeup_counter=0;
-    //     /*Get lighting command*/
-    //     http_request_command();
-    // }
-    // else read_sensor(); //Keep sending sensor data
+    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * DEEP_SLEEP_TIME_SEC));
+    //test_command();
+    /*Checking whether to request command for adjusting LED light or keep sending sensor data*/
+    if (wakeup_counter == GET_COMMAND_RESET)
+    {
+        /*Reset counter*/
+        wakeup_counter=0;
+        /*Get lighting command*/
+        http_request_command();
+    }
+    else read_sensor(); //Keep sending sensor data
 }     
 
 

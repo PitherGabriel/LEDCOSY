@@ -79,7 +79,6 @@ def handle_command_request():
                 co2.append(record.co2)
             # Convert lists into one array
             input = np.array([temp,hum,co2])
-            print(input)
             prediction = lst_model.predict(input)
             action, gain = calculate_command(230,340)
             return jsonify ({'action':action,

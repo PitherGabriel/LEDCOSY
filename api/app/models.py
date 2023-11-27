@@ -38,10 +38,10 @@ class LSTMModel:
         scaled_data = scaled_data.reshape(1,scaled_data.shape[1], scaled_data.shape[0])
         # Prediction
         prediction = self.model.predict(scaled_data)
-        print(prediction.shape)
+        #print(prediction.shape)
         # Re-scale data to original
-        reshaped = prediction.reshape(-1,3)
-        real = self.Scaler.inverse_transform(reshaped)[:,-1]
-        return real
+        #reshaped = prediction.reshape(-1,3)
+        #real = self.Scaler.inverse_transform(reshaped)[:,-1]
+        return prediction
 
 lst_model = LSTMModel()
