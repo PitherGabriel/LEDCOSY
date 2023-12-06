@@ -2,14 +2,15 @@
 #include "servo.h"
 #include "esp_log.h"
 #include "esp_err.h"
-#include "esp_sleep.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/mcpwm_prelude.h"
 
 static const char *TAG = "Servo";
+int angle = 225;
 
-void move_servo(void){
+
+void move_servo(int *action, float *gain){
     ESP_LOGI(TAG,"Create timer and operator");
     mcpwm_timer_handle_t timer = NULL;
     mcpwm_timer_config_t timer_config = {
@@ -59,20 +60,8 @@ void move_servo(void){
     ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
 
-    int angle = 0;
-    int step = 2;
-    while (1) {
     ESP_LOGI(TAG, "Angle of rotation: %d", angle);
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
-    //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
-    vTaskDelay(pdMS_TO_TICKS(500));
-    if ((angle + step) > 60 || (angle + step) < -60) {
-            break;
-            step *= -1;
-        }
-        angle += step;
-    }
-
-    //printf("Entering deep sleep...\n");
-    //esp_deep_sleep_start();
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    printf("Servo task ended...\n");
 }

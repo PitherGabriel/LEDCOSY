@@ -16,6 +16,10 @@
         .table-container {
             margin-bottom: 20px;
         }
+        /* Add margin to the right of the first table */
+        .table-container:first-child {
+        margin-right: 200px; /* Adjust the value as needed */
+        }
     </style>
 </head>
 <body>
@@ -50,9 +54,25 @@
 
             <!-- Forecasting Data -->
             <div class="col-md-4 table-container">
-                <h2 class="mb-4">Forecasting Data</h2>
+                <h2 class="mb-4">Forecasted Data</h2>
                 <table class="table table-bordered">
                     <!-- Repeat similar structure for forecasting_data -->
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>CO2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in forecasting_data %}
+                            <tr>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.timestamp }}</td>
+                                <td>{{ row.co2 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>

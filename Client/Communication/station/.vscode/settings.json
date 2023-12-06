@@ -19,6 +19,7 @@
     "esp_sleep.h": "c",
     "gpio_types.h": "c",
     "soc_caps.h": "c",
-    "touch_sensor_types.h": "c"
+    "touch_sensor_types.h": "c",
+    "chrono": "c"
   }
 }

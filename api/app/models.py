@@ -35,13 +35,13 @@ class LSTMModel:
     def predict(self, input_data):
         # Scale data
         scaled_data = self.Scaler.fit_transform(input_data)
-        scaled_data = scaled_data.reshape(1,scaled_data.shape[1], scaled_data.shape[0])
-        # Prediction
-        prediction = self.model.predict(scaled_data)
-        #print(prediction.shape)
-        # Re-scale data to original
-        #reshaped = prediction.reshape(-1,3)
-        #real = self.Scaler.inverse_transform(reshaped)[:,-1]
-        return prediction
+        scaled_data = scaled_data.reshape(1,scaled_data.shape[0], scaled_data.shape[1])
+        # Prediction and reshape
+        prediction = self.model.predict(scaled_data) # (1,12)
+        reshaped = prediction.transpose() # (12,1)
+        reshaped = np.repeat(reshaped, 3, axis=1) # (12,3)
+        # Re-scale data
+        real = self.Scaler.inverse_transform(reshaped)[:,-1] # (12, )
+        return real[-1] # Return last prediction
 
 lst_model = LSTMModel()

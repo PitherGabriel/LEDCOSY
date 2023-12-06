@@ -1,14 +1,11 @@
 #include "sensor.h"
-#include "api_communication.h"
 #include "esp_log.h"
 #include "esp_err.h"
-#include "esp_sleep.h"
-#include <sys/time.h> 
 
 static const char* TAG = "Sensor"; 
 
 
-void sensor_read_task(void *args)
+void sensor_read(float *co2, float *temperature, float *humidity)
 {
     /*Sensor init*/
     i2c_dev_t dev = {0};
@@ -20,15 +17,13 @@ void sensor_read_task(void *args)
     //minor_ver = version & 0xf;
     //ESP_LOGI(TAG, "SCD30 Firmware Version: %d.%d", major_ver, minor_ver);
     ESP_LOGI(TAG, "Starting measurement");
-    /*Variable to store sensor data*/
-    float co2, temperature, humidity;
     bool data_ready;
     while (1)
     {
         scd30_get_data_ready_status(&dev, &data_ready);
         if (data_ready)
         {
-            esp_err_t res = scd30_read_measurement(&dev, &co2, &temperature, &humidity);
+            esp_err_t res = scd30_read_measurement(&dev, co2, temperature, humidity);
             if (res != ESP_OK)
             {
                 ESP_LOGE(TAG, "Error reading results %d (%s)", res, esp_err_to_name(res));
@@ -41,16 +36,8 @@ void sensor_read_task(void *args)
                 continue;
             }
 
-            /*Send data over httpget*/
-            printf("Sending data to server...\n");
-            http_send_data(temperature, humidity, co2);
-            vTaskDelete(NULL);
+            printf("Sensor data read.\n");
+            break;
         }
     }
-
-    }
-
-void read_sensor(void)
-{
-    xTaskCreate(&sensor_read_task, "sensor_task",configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL);
 }

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "api_communication.h"
 #include "servo.h"
+#include "main.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -47,9 +48,8 @@ char web_path[WEB_PATH_LENGTH];
 
 //static RTC_DATA_ATTR struct timeval sleep_enter_time;
 
-static void http_get_task(void *pvParameter)
+static void http_get_task(void)
 {
-    int *pvSignal = pvParameter;
     const struct addrinfo hints = {
         .ai_family = AF_INET,
         .ai_socktype = SOCK_STREAM,
@@ -61,7 +61,7 @@ static void http_get_task(void *pvParameter)
 
     while(1) {
         
-            int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
+        int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
 
         if(err != 0 || res == NULL) {
             ESP_LOGE(TAG, "DNS lookup failed err=%d res=%p", err, res);
@@ -126,19 +126,7 @@ static void http_get_task(void *pvParameter)
 
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
-        if (pvSignal)
-        {
-            /*Skip deep sleep and move servo*/
-            move_servo();    
-            vTaskDelete(NULL);
-        }
-        else 
-        {
-            /*Enter deep sleep mode*/
-            printf("Entering deep sleep...\n");
-            esp_deep_sleep_start();
-        }        
-        
+        break;        
     }
         }
 
@@ -174,15 +162,12 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
 
     printf(request);
     printf("\n");
-
-    xTaskCreate(&http_get_task, "http_post_task", 4096, NULL, 5, NULL);
+    
+    http_get_task();
  }
 
- void http_request_command(void){
-    int get_signal = 1;
-    //float gain=0;
-    //int action=0;
-    
+ void http_request_command(int *action, float *gain){
+        
     char json_request[50] = "{\"action\":\"gain\"}";
 
     int json_size_bytes = strlen(json_request);
@@ -207,6 +192,6 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
 
     printf(request);
     printf("\n");
-
-    xTaskCreate(&http_get_task, "http_get_task", 4096, (void*)&get_signal, 5, NULL);
+    
+    http_get_task(); 
  }
