@@ -6,18 +6,20 @@
 #include "main.h"
 
 static const char* TAG = "app_main";
-#define GET_COMMAND_RESET            3   /*Number of wakes for controlling LED*/
-#define GET_START_SYSTEM              1   /*When system starts*/
+#define GET_COMMAND_RESET            12   /*Number of wakes for controlling LED*/
+#define GET_START_SYSTEM             1   /*When system starts*/
 
 /*Variable definition*/
-long DEEP_SLEEP_TIME_SEC = 30;   /*Sleep time in sec*/
+long DEEP_SLEEP_TIME_SEC = 30;          /*Sleep time in sec*/
 RTC_DATA_ATTR int wakeup_counter = 0;
 float co2, temperature, humidity = 0;
+RTC_DATA_ATTR float angle = 15;         /*System starts at fixed angle*/
 int action = 0;
 float gain = 0;
 
 /*Function prototypes*/
 void wakeup_reason();
+void calculate_angle(int *, float *, float *);
 
 
 void app_main(void)
@@ -29,26 +31,30 @@ void app_main(void)
     connect_wifi();
     /*Init 12c*/
     ESP_ERROR_CHECK(i2cdev_init());
+    
+    /*Send sensor data*/
+    sensor_read(&co2, &temperature, &humidity); //Read sensor data
+    http_send_data(temperature, humidity, co2); //Send data to server
 
-    /*Checking if request command for adjusting LED light or keep sending sensor data*/
+    /*Checking if request command for adjusting LED light*/
     if (wakeup_counter == GET_COMMAND_RESET)
     {
         /*Reset counter*/
         wakeup_counter = 0;
         /*Request lighting command from server*/
         http_request_command(&action, &gain);
-        /*Move servo [angle*gain*action]*/
-        move_servo(&action, &gain);
+        /*Calculate angle*/
+        calculate_angle(&action, &gain, &angle);
+        /*Move servo*/
+        move_servo(&angle);
     }
-    else 
+
+    if(!wakeup_counter) //When system starts up
     {
-        sensor_read(&co2, &temperature, &humidity); //Read sensor data
-        http_send_data(temperature, humidity, co2); //Send data to server
-    }
-    if(wakeup_counter == 0) //When system starts up
-    {
+        /*Move servo to initial fixed position*/
+        move_servo(&angle);
         /*Enable timer wakeup resource*/
-        ESP_LOGI(TAG, "Enabling timer wakeup resource...");
+        //ESP_LOGI(TAG, "Enabling timer wakeup resource...");
         ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC)));
         esp_deep_sleep_start();
 
@@ -57,7 +63,7 @@ void app_main(void)
     {
         gettimeofday(&time2, NULL);
         float time_ms = (time2.tv_sec - time1.tv_sec)*1000 + (time2.tv_usec - time1.tv_usec)/1000;
-        printf("Sensor read and data sent in %f ms.,and %0.3f sec.\n",  time_ms, (time_ms/1000));
+        //printf("Wake up time spent: %f ms.,and %0.3f sec.\n",  time_ms, (time_ms/1000));
         ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC-(time_ms/1000))));
         esp_deep_sleep_start();
     }
@@ -76,5 +82,27 @@ void wakeup_reason(){
         case ESP_SLEEP_WAKEUP_UNDEFINED:
         default:
             printf("Not a deep sleep reset. Wake up number: %d\n.", wakeup_counter);
+    }
+}
+
+void calculate_angle(int *action, float *gain, float *angle){
+    float degrees = 0;
+    degrees = angle*gain;
+    if (action)
+    {
+        angle +=degrees;
+        if (angle>225)
+        {
+            angle=225;
+        }
+
+    }
+    else 
+    {
+        angle-=degrees;
+        if (angle<195)
+        {
+            angle=195;
+        }
     }
 }
