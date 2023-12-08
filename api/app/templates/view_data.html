@@ -11,6 +11,7 @@
         /* Add custom styling */
         body {
             padding-top: 50px; /* Adjust as needed */
+            padding-left: 0px;
         }
 
         .table-container {
@@ -75,6 +76,33 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Command data -->
+            <div class="col-md-4 table-container">
+                <h2 class="mb-4">Command Data</h2>
+                <table class="table table-bordered">
+                    <!-- Repeat similar structure for forecasting_data -->
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>Action</th>
+                            <th>Gain</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in command_data %}
+                            <tr>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.timestamp }}</td>
+                                <td>{{ row.action }}</td>
+                                <td>{{ row.gain }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 

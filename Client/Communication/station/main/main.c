@@ -4,26 +4,28 @@
 #include <stdio.h>
 #include "servo.h"
 #include "main.h"
+#include "math.h"
 
 static const char* TAG = "app_main";
-#define GET_COMMAND_RESET            12   /*Number of wakes for controlling LED*/
+#define GET_COMMAND_RESET            4 //12   /*Number of wakes for controlling LED*/
 #define GET_START_SYSTEM             1   /*When system starts*/
 
 /*Variable definition*/
 long DEEP_SLEEP_TIME_SEC = 30;          /*Sleep time in sec*/
 RTC_DATA_ATTR int wakeup_counter = 0;
 float co2, temperature, humidity = 0;
-RTC_DATA_ATTR float angle = 15;         /*System starts at fixed angle*/
+RTC_DATA_ATTR int angle = 30;         /*System starts at fixed angle*/
 int action = 0;
-float gain = 0;
+int gain = 0;
 
 /*Function prototypes*/
 void wakeup_reason();
-void calculate_angle(int *, float *, float *);
-
+void calculate_angle(int , int);
+void test(void);
 
 void app_main(void)
 {
+    //test();
     struct timeval time1, time2;
     gettimeofday(&time1, NULL); 
     wakeup_reason();
@@ -43,16 +45,17 @@ void app_main(void)
         wakeup_counter = 0;
         /*Request lighting command from server*/
         http_request_command(&action, &gain);
+        printf("Action: %d, gain: %d", action, gain);
         /*Calculate angle*/
-        calculate_angle(&action, &gain, &angle);
+        calculate_angle(action, gain);
         /*Move servo*/
-        move_servo(&angle);
+        move_servo(angle);
     }
 
     if(!wakeup_counter) //When system starts up
     {
         /*Move servo to initial fixed position*/
-        move_servo(&angle);
+        move_servo(angle);
         /*Enable timer wakeup resource*/
         //ESP_LOGI(TAG, "Enabling timer wakeup resource...");
         ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC)));
@@ -85,9 +88,9 @@ void wakeup_reason(){
     }
 }
 
-void calculate_angle(int *action, float *gain, float *angle){
-    float degrees = 0;
-    degrees = angle*gain;
+void calculate_angle(int action, int gain){
+    int degrees = 0;
+    degrees = round((angle*gain)/100);
     if (action)
     {
         angle +=degrees;
@@ -97,6 +100,12 @@ void calculate_angle(int *action, float *gain, float *angle){
         }
 
     }
+    else if (!action)
+    {
+        degrees = 0;
+        angle += degrees;
+    }
+    
     else 
     {
         angle-=degrees;
@@ -105,4 +114,19 @@ void calculate_angle(int *action, float *gain, float *angle){
             angle=195;
         }
     }
+}
+
+void test (void){
+    
+    // move_servo(angle);
+    // while (1)
+    // {
+    //     /* code */
+    // }
+    
+    //ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC)));
+    //esp_deep_sleep_start();
+
+    http_request_command(&action, &gain);
+
 }

@@ -1,7 +1,7 @@
 {
     "version":            "1",
     "project_name":       "ESP32_Client",
-    "project_version":    "5b94e5c-dirty",
+    "project_version":    "a04e915-dirty",
     "project_path":       "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station",
     "idf_path":           "C:/Users/Pither/esp/esp-idf",
     "build_dir":          "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/build",
@@ -1435,7 +1435,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/build/esp-idf/main/libmain.a",
-            "sources": [ "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/sensor.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/main.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/wifi_connection.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/api_communication.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/servo.c" ],
+            "sources": [ "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/iot_servo.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/sensor.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/main.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/wifi_connection.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/api_communication.c", "C:/Users/Pither/Desktop/LEDCOSY/Client/Communication/station/main/servo.c" ],
             "include_dirs": [ "." ]
         },
         "max1704x": {

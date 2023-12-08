@@ -7,8 +7,9 @@
 #include "driver/mcpwm_prelude.h"
 
 static const char *TAG = "Servo";
+int angle_init = 30;
 
-void move_servo(float *angle){
+void move_servo(int angle){
     ESP_LOGI(TAG,"Create timer and operator");
     mcpwm_timer_handle_t timer = NULL;
     mcpwm_timer_config_t timer_config = {
@@ -43,9 +44,6 @@ void move_servo(float *angle){
     };
     ESP_ERROR_CHECK(mcpwm_new_generator(oper, &generator_config, &generator));
 
-    // set the initial compare value, so that the servo will spin to the center position
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
-
     ESP_LOGI(TAG, "Set generator action on timer and compare event");
     // go high on counter empty
     ESP_ERROR_CHECK(mcpwm_generator_set_action_on_timer_event(generator,
@@ -56,5 +54,19 @@ void move_servo(float *angle){
 
     ESP_LOGI(TAG, "Enable and start timer");
     ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
-    ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));    
+    ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));        
+   
+
+
+    if(angle!=angle_init)
+    {
+    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
+    vTaskDelay(500/portTICK_PERIOD_MS);
+    }
+    else 
+    {
+    // set the initial compare value, so that the servo will spin to the initial position
+    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle_init)));
+    vTaskDelay(500/portTICK_PERIOD_MS);
+    }    
 }

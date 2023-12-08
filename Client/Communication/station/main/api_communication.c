@@ -45,8 +45,7 @@ static const char* JSON_CONTENT_SUFFIX = "Content-Type: application/json\r\n"
 
 char request[REQUEST_LENGTH];
 char web_path[WEB_PATH_LENGTH];
-
-//static RTC_DATA_ATTR struct timeval sleep_enter_time;
+char recv_buf[64];
 
 static void http_get_task(void)
 {
@@ -57,8 +56,6 @@ static void http_get_task(void)
     struct addrinfo *res;
     struct in_addr *addr;
     int s, r;
-    char recv_buf[64];
-
     while(1) {
         
         int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
@@ -123,7 +120,7 @@ static void http_get_task(void)
                 putchar(recv_buf[i]);
             }
         } while(r > 0);
-
+        
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
         break;        
@@ -134,7 +131,8 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
     sprintf(buffer, "{\"temperature\":%.2f,\"humidity\":%.2f,\"co2\":%.2f}", temp, hum, co2);
 }
 
- void http_send_data(float temp, float hum, float co2)
+
+void http_send_data(float temp, float hum, float co2)
 {
     // Reset request and web path memory
     memset(request, 0, REQUEST_LENGTH);
@@ -166,7 +164,7 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
     http_get_task();
  }
 
- void http_request_command(int *action, float *gain){
+ void http_request_command(int *action, int *gain){
         
     char json_request[50] = "{\"action\":\"gain\"}";
 
@@ -194,4 +192,6 @@ void encode_sensor_data(char *buffer, float temp, float hum, float co2){
     printf("\n");
     
     http_get_task(); 
+
+    sscanf(recv_buf, "action:%d, gain:%d", action, gain);
  }

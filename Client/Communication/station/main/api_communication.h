@@ -9,6 +9,6 @@
  
 void encode_sensor_data(char*, float , float , float );
 void http_send_data(float, float, float);
-void http_request_command(int *, float*);
+void http_request_command(int *, int*);
 
 #endif //API_COMMUNICATION_H

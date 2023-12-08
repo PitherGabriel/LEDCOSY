@@ -6,7 +6,7 @@ LSTM_PATH = 'app/LSTM/LSTMmodel.h5'
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI = 'sqlite:///DatabaseExample'
+    app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI = 'sqlite:///MainDatabase'
     db.init_app(app)
     # Register blueprint
     from app.routes import api

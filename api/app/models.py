@@ -20,6 +20,7 @@ class forecasting_table(db.Model):
 
 class command_table(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     action =db.Column(db.String(255))
     gain = db.Column(db.Float)
 
@@ -38,10 +39,11 @@ class LSTMModel:
         scaled_data = scaled_data.reshape(1,scaled_data.shape[0], scaled_data.shape[1])
         # Prediction and reshape
         prediction = self.model.predict(scaled_data) # (1,12)
+        print(prediction)
         reshaped = prediction.transpose() # (12,1)
         reshaped = np.repeat(reshaped, 3, axis=1) # (12,3)
         # Re-scale data
         real = self.Scaler.inverse_transform(reshaped)[:,-1] # (12, )
-        return real[-1] # Return last prediction
+        return real# Return prediction
 
 lst_model = LSTMModel()
