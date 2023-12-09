@@ -118,15 +118,13 @@ void calculate_angle(int action, int gain){
 
 void test (void){
     
-    // move_servo(angle);
+     move_servo(0);
     // while (1)
     // {
     //     /* code */
     // }
     
-    //ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC)));
-    //esp_deep_sleep_start();
-
-    http_request_command(&action, &gain);
-
+    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC)));
+    esp_deep_sleep_start();
+    //http_request_command(&action, &gain);
 }

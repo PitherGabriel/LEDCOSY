@@ -11,6 +11,7 @@
 #include "api_communication.h"
 #include "servo.h"
 #include "main.h"
+#include "cJSON.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -46,6 +47,7 @@ static const char* JSON_CONTENT_SUFFIX = "Content-Type: application/json\r\n"
 char request[REQUEST_LENGTH];
 char web_path[WEB_PATH_LENGTH];
 char recv_buf[64];
+cJSON *json;
 
 static void http_get_task(void)
 {
@@ -113,14 +115,20 @@ static void http_get_task(void)
         ESP_LOGI(TAG, "... set socket receiving timeout success");
 
         /* Read HTTP response */
-        do {
-            bzero(recv_buf, sizeof(recv_buf));
-            r = read(s, recv_buf, sizeof(recv_buf)-1);
-            for(int i = 0; i < r; i++) {
-                putchar(recv_buf[i]);
-            }
-        } while(r > 0);
-        
+        // do {
+        //     bzero(recv_buf, sizeof(recv_buf));
+        //     r = read(s, recv_buf, sizeof(recv_buf)-1);
+            
+        //     for(int i = 0; i < r; i++) {
+        //         putchar(recv_buf[i]);
+        //     }
+        //     } while(r > 0);
+        bzero(recv_buf, sizeof(recv_buf));
+        r = read(s, recv_buf, sizeof(recv_buf)-1);
+        json = cJSON_Parse(recv_buf);        
+        // for(int i = 0; i < r; i++) {
+        //     putchar(recv_buf[i]);
+        // }
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
         break;        
@@ -167,7 +175,6 @@ void http_send_data(float temp, float hum, float co2)
  void http_request_command(int *action, int *gain){
         
     char json_request[50] = "{\"action\":\"gain\"}";
-
     int json_size_bytes = strlen(json_request);
     char jsonsize_str[5];
     itoa(json_size_bytes, jsonsize_str, 10);   
@@ -191,7 +198,25 @@ void http_send_data(float temp, float hum, float co2)
     printf(request);
     printf("\n");
     
-    http_get_task(); 
-
-    sscanf(recv_buf, "action:%d, gain:%d", action, gain);
+    http_get_task();    
+  
+    if (json != NULL)
+    {
+        printf("JSON file with something");
+        cJSON *action_json = cJSON_GetObjectItem(json, "action");
+        cJSON *gain_json = cJSON_GetObjectItem(json, "gain");
+        if (action_json!=NULL && gain_json!=NULL)
+        {
+            *action = action_json->valueint;
+            *gain = gain_json->valueint;
+        }
+        cJSON_Delete(json);
+    }
+    else
+    {
+    const char *error_ptr = cJSON_GetErrorPtr();
+    if (error_ptr != NULL) {
+        fprintf(stderr, "Error before: %s\n", error_ptr);
+        }
+    }
  }

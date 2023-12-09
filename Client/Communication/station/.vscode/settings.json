@@ -21,6 +21,7 @@
     "soc_caps.h": "c",
     "touch_sensor_types.h": "c",
     "chrono": "c",
-    "*.tcc": "c"
+    "*.tcc": "c",
+    "cjson.h": "c"
   }
 }
