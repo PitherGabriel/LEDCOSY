@@ -70,7 +70,7 @@ static void http_get_task(void)
 
         /* Code to print the resolved IP.
 
-           Note: inet_ntoa is non-reentrant, look at ipaddr_ntoa_r for "real" code */
+            Note: inet_ntoa is non-reentrant, look at ipaddr_ntoa_r for "real" code */
         addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
         ESP_LOGI(TAG, "DNS lookup succeeded. IP=%s", inet_ntoa(*addr));
 
@@ -118,17 +118,14 @@ static void http_get_task(void)
         // do {
         //     bzero(recv_buf, sizeof(recv_buf));
         //     r = read(s, recv_buf, sizeof(recv_buf)-1);
-            
         //     for(int i = 0; i < r; i++) {
         //         putchar(recv_buf[i]);
         //     }
-        //     } while(r > 0);
+        //     json = cJSON_Parse(&recv_buf);
+        //     } while(r > 0);    
         bzero(recv_buf, sizeof(recv_buf));
         r = read(s, recv_buf, sizeof(recv_buf)-1);
-        json = cJSON_Parse(recv_buf);        
-        // for(int i = 0; i < r; i++) {
-        //     putchar(recv_buf[i]);
-        // }
+        json = cJSON_Parse(recv_buf);
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
         break;        
@@ -199,7 +196,11 @@ void http_send_data(float temp, float hum, float co2)
     printf("\n");
     
     http_get_task();    
-  
+    for (int i = 0; i < sizeof(recv_buf); i++)
+    {
+        /* code */
+        printf("%c",recv_buf[i]);
+    }
     if (json != NULL)
     {
         printf("JSON file with something");

@@ -117,8 +117,8 @@ void calculate_angle(int action, int gain){
 }
 
 void test (void){
-    
-     move_servo(0);
+    http_request_command(&action, &gain);
+    //move_servo(0);
     // while (1)
     // {
     //     /* code */
