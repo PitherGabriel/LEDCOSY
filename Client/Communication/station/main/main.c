@@ -11,10 +11,10 @@ static const char* TAG = "app_main";
 #define GET_START_SYSTEM             1   /*When system starts*/
 
 /*Variable definition*/
-long DEEP_SLEEP_TIME_SEC = 30;          /*Sleep time in sec*/
+long DEEP_SLEEP_TIME_SEC = 120;          /*Sleep time in sec*/
 RTC_DATA_ATTR int wakeup_counter = 0;
 float co2, temperature, humidity = 0;
-RTC_DATA_ATTR int angle = 30;         /*System starts at fixed angle*/
+RTC_DATA_ATTR int angle = 225/2;         /*System starts at fixed angle*/
 int action = 0;
 int gain = 0;
 
@@ -25,7 +25,7 @@ void test(void);
 
 void app_main(void)
 {
-    //test();
+
     struct timeval time1, time2;
     gettimeofday(&time1, NULL); 
     wakeup_reason();
@@ -33,7 +33,7 @@ void app_main(void)
     connect_wifi();
     /*Init 12c*/
     ESP_ERROR_CHECK(i2cdev_init());
-    
+    //test();
     /*Send sensor data*/
     sensor_read(&co2, &temperature, &humidity); //Read sensor data
     http_send_data(temperature, humidity, co2); //Send data to server
@@ -117,8 +117,20 @@ void calculate_angle(int action, int gain){
 }
 
 void test (void){
-    http_request_command(&action, &gain);
-    //move_servo(0);
+    //http_request_command(&action, &gain);
+    int count = 10;
+    int step = 50;
+    move_servo(step);
+    // for (int i = 0; i < count; i++)
+    // {
+    //     move_servo(step);
+    //     step-=25;
+    //     vTaskDelay(5000/portTICK_PERIOD_MS);
+
+    // }
+    // move_servo(225);
+    // vTaskDelay(5000/portTICK_PERIOD_MS);
+    // move_servo(0);
     // while (1)
     // {
     //     /* code */

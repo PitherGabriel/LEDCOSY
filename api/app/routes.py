@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, make_response
 from . import db
 from app.models import sensor_table, forecasting_table, command_table
 from app.models import lst_model
@@ -40,20 +40,25 @@ def predict():
     """
     """
     try:
-        # Get last 24 data from database
-        data = db.session.query(sensor_table).order_by(sensor_table.timestamp.desc()).limit(24).all()
-        # Store data into list 
-        temp, hum, co2 = [], [], []
-        for record in data:
-            temp.append(record.temperature)
-            hum.append(record.humidity)
-            co2.append(record.co2)
-        # Convert lists into one array
-        input_data = np.array([temp,hum,co2]).transpose()
-        prediction = lst_model.predict(input_data)
-        output = prediction
-        update_forecasting_table(output)
-        return output
+        record_count = db.session.query(sensor_table).count()
+        if record_count >= 24:
+            # Get last 24 data from database 
+            data = db.session.query(sensor_table).order_by(sensor_table.timestamp.desc()).limit(24).all()
+            # Check for when there is no data in the table
+            # Store data into list 
+            temp, hum, co2 = [], [], []
+            for record in data:
+                temp.append(record.temperature)
+                hum.append(record.humidity)
+                co2.append(record.co2)
+            # Convert lists into one array
+            input_data = np.array([temp,hum,co2]).transpose()
+            prediction = lst_model.predict(input_data)
+            output = prediction
+            update_forecasting_table(output)
+            return output
+        else:
+            return 0
     except Exception as e:
         logging.error(f"Error prediccting CO2:{e}")
 
@@ -115,10 +120,12 @@ def handle_command_request():
     try:
         command = request.get_json()
         if command:
-            #action = command.get('action')
-            #gain = command.get('gain')
             prediction= predict()
             #print(prediction)
+            if prediction==0:
+                return jsonify ({'action':0, 
+                                 'gain': 0})
+            
             action, gain = calculate_command(prediction[-1])
             return jsonify ({'action':action,
                              'gain': gain})
@@ -132,9 +139,13 @@ def handle_test():
         prediction= predict()
         print(prediction)
         action, gain = calculate_command(prediction[-1])
+        data = {'action':action,
+                 'gain': gain}
+        response = make_response(json.dumps(data))
+        response.status_code = 200
+        response.headers['Content-Type'] = 'text/plain'  # Set the content type as needed
 
-        return jsonify ({'action':action,
-                         'gain': gain})
+        return response
     except Exception as e:
         logging.error(f"Error: {e}")
         return jsonify({"error":"Error handling command request"})

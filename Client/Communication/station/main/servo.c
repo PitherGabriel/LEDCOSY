@@ -43,6 +43,9 @@ void move_servo(int angle){
         .gen_gpio_num = SERVO_PULSE_GPIO,
     };
     ESP_ERROR_CHECK(mcpwm_new_generator(oper, &generator_config, &generator));
+    
+    // set the initial compare value, so that the servo will spin to the center position
+    //ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(0)));
 
     ESP_LOGI(TAG, "Set generator action on timer and compare event");
     // go high on counter empty
@@ -55,18 +58,17 @@ void move_servo(int angle){
     ESP_LOGI(TAG, "Enable and start timer");
     ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));        
-   
-
-
     if(angle!=angle_init)
     {
+    printf("Moving servo %d degrees\n", angle );
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    vTaskDelay(1000/portTICK_PERIOD_MS);
     }
     else 
     {
+    printf("Moving servo %d degrees\n", angle_init );
     // set the initial compare value, so that the servo will spin to the initial position
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle_init)));
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    vTaskDelay(1000/portTICK_PERIOD_MS);
     }    
 }
