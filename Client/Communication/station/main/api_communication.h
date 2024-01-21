@@ -2,7 +2,7 @@
 #define API_COMMUNICATION_H
 
 /* Constants that aren't configurable in menuconfig */
-#define WEB_SERVER "192.168.1.173"
+#define WEB_SERVER "172.20.10.4"
 #define WEB_PORT "5000"
 #define SENSOR_PREFIX_PATH "/api/updatedb"
 #define FORECASTING_PREFIX_PATH "api/testing"

@@ -11,12 +11,18 @@ class sensor_table(db.Model):
     humidity = db.Column(db.Float)
     co2 = db.Column(db.Float)
 
+class test_table(db.Model):
+    __tablename__ = 'test_table'
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp =db.Column(db.DateTime)
+    temperature = db.Column(db.Float)
+    humidity = db.Column(db.Float)
+    co2 = db.Column(db.Float)
 
 class forecasting_table(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp =db.Column(db.DateTime, default=datetime.utcnow)
     co2 = db.Column(db.Float)
-
 
 class command_table(db.Model):
     id = db.Column(db.Integer, primary_key=True)

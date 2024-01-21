@@ -7,11 +7,11 @@
 #include "math.h"
 
 static const char* TAG = "app_main";
-#define GET_COMMAND_RESET            4 //12   /*Number of wakes for controlling LED*/
+#define GET_COMMAND_RESET            1 //12   /*Number of wakes for controlling LED*/
 #define GET_START_SYSTEM             1   /*When system starts*/
 
 /*Variable definition*/
-long DEEP_SLEEP_TIME_SEC = 120;          /*Sleep time in sec*/
+long DEEP_SLEEP_TIME_SEC = 10;          /*Sleep time in sec*/
 RTC_DATA_ATTR int wakeup_counter = 0;
 float co2, temperature, humidity = 0;
 RTC_DATA_ATTR int angle = 225/2;         /*System starts at fixed angle*/
@@ -35,8 +35,8 @@ void app_main(void)
     ESP_ERROR_CHECK(i2cdev_init());
     //test();
     /*Send sensor data*/
-    sensor_read(&co2, &temperature, &humidity); //Read sensor data
-    http_send_data(temperature, humidity, co2); //Send data to server
+    //sensor_read(&co2, &temperature, &humidity); //Read sensor data
+    //http_send_data(temperature, humidity, co2); //Send data to server
 
     /*Checking if request command for adjusting LED light*/
     if (wakeup_counter == GET_COMMAND_RESET)
@@ -58,6 +58,7 @@ void app_main(void)
         move_servo(angle);
         /*Enable timer wakeup resource*/
         //ESP_LOGI(TAG, "Enabling timer wakeup resource...");
+        printf("Going to sleep...");
         ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC)));
         esp_deep_sleep_start();
 
@@ -68,6 +69,7 @@ void app_main(void)
         float time_ms = (time2.tv_sec - time1.tv_sec)*1000 + (time2.tv_usec - time1.tv_usec)/1000;
         //printf("Wake up time spent: %f ms.,and %0.3f sec.\n",  time_ms, (time_ms/1000));
         ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(1000000ULL * (DEEP_SLEEP_TIME_SEC-(time_ms/1000))));
+        printf("Going to sleep...");
         esp_deep_sleep_start();
     }
 }     
