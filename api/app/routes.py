@@ -13,19 +13,15 @@ from io import BytesIO
 from matplotlib.figure import Figure
 
 
-TESTDATA_PATH = 'app/static/TestDataset.csv'
+#TESTDATA_PATH = 'app/static/TestDataset.csv'
+PRESENTATIONDATA_PATH = 'app/static/presentationData.csv'
+VALIDATIONDATA_PATH = 'app/static/TrainDataset.csv'
 
-def getTestdata():
-    with open (TESTDATA_PATH, newline='') as csvfile:
+def getTestdata(PATH):
+    with open (PATH, newline='') as csvfile:
         df = pd.read_csv(csvfile)
     data = df.values
-    temp, hum, co2 = [], [], []
-    temp = [row[4] for row in data]
-    hum = [row[3] for row in data]
-    co2 = [row[2] for row in data]
-    # Convert lists into one array
-    input_data = np.array([temp,hum,co2]).transpose() #(1,samples, 3)
-    return input_data
+    return data
 
 def calculate_command(last_prediction):
     """
@@ -83,21 +79,20 @@ def predict_test():
     """
     """
     try:
-        # with open (TESTDATA_PATH, newline='') as csvfile:
-        #     df = pd.read_csv(csvfile)
         global inputData
-        # data = data[:24]
-        # temp, hum, co2 = [], [], []
-        # temp = [row[4] for row in data]
-        # hum = [row[3] for row in data]
-        # co2 = [row[2] for row in data]
-        # # Convert lists into one array
-        # input_data = np.array([temp,hum,co2]).transpose()
-        print(inputData[:24])
-        prediction = lst_model.predict(inputData[:24])
+        global presentationData
+        temp, hum, co2 = [], [], []
+        temp = [row[3] for row in inputData]
+        hum = [row[2] for row in inputData]
+        co2 = [row[1] for row in inputData]
+        # Convert lists into one array
+        input_data = np.array([temp,hum,co2]).transpose() #(1,samples, 3)
+        print(input_data[:24])
+        prediction = lst_model.predict(input_data[:24])
         print(prediction)
-        last_value = inputData[2][-1]
+        last_value = input_data[2][-1]
         last_prediction = prediction[-1]
+        
         if last_value == 0:
             gain = 0
         else:
@@ -114,9 +109,9 @@ def predict_test():
             action = 0
             print("No changes on CO2 levels")
         update_command_table(action,gain)
-
         inputData = inputData[12:]
-
+        # Concatanate predictions to presentationData
+        #presentationData[1] = prediction
         return action, gain
     except Exception as e:
         logging.error(f"Error predicting CO2:{e}")
@@ -136,9 +131,11 @@ def update_command_table(action, gain):
     db.session.add(new_data)
     db.session.commit()
     db.session.close()
+ 
 
 api = Blueprint('api', __name__)
-inputData = getTestdata()
+inputData = getTestdata(VALIDATIONDATA_PATH)
+presentationData = getTestdata(PRESENTATIONDATA_PATH)
 @api.route('/')
 def home():
     return render_template("index.html")
@@ -181,11 +178,7 @@ def handle_command_request():
     try:
         command = request.get_json()
         if command:
-            prediction= predict()
-            if prediction==0:
-                return jsonify ({'action':0, 
-                                 'gain': 0})
-            
+            prediction= predict()           
             action, gain = calculate_command(prediction[-1])
             return jsonify ({'action':action,
                              'gain': gain})
@@ -198,9 +191,6 @@ def handle_test():
     try:        
         command = request.get_json()
         if command:
-            # if prediction == 0:
-            #     return jsonify({'action':0,
-            #                     'gain':0})
             action, gain = predict_test()
             return jsonify({'action':action,
                             'gain':gain})
@@ -211,17 +201,9 @@ def handle_test():
 
 @api.route('/graphics')
 def showgraphs():
-    global inputData
-    with open (TESTDATA_PATH, newline='') as csvfile:
-        df = pd.read_csv(csvfile)
-
-    dataHistorical = inputData
-    dataForecast = df[100:].values
-
-    labels1 = [row[1] for row in dataHistorical]
-    values1 = [row[2] for row in dataHistorical]
-
-    labels2 = [row[1] for row in dataForecast]
-    values2 = [row[2] for row in dataForecast]
-    
-    return render_template("graphics.html", labels1=labels1, values1=values1, labels2=labels2, values2=values2)
+    global presentationData
+    commandData = command_table.query.order_by(command_table.id.desc()).limit(3).all()
+    dataHistorical = presentationData 
+    labels1 = [row[0] for row in dataHistorical]
+    values1 = [row[1] for row in dataHistorical]
+    return render_template("graphics.html", labels1=labels1, values1=values1, commandData =commandData)

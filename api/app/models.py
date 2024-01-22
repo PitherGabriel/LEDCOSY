@@ -45,7 +45,7 @@ class LSTMModel:
         scaled_data = scaled_data.reshape(1,scaled_data.shape[0], scaled_data.shape[1])
         # Prediction and reshape
         prediction = self.model.predict(scaled_data) # (1,12)
-        print(prediction)
+        #print(prediction)
         reshaped = prediction.transpose() # (12,1)
         reshaped = np.repeat(reshaped, 3, axis=1) # (12,3)
         # Re-scale data

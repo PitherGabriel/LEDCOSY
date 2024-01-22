@@ -7,7 +7,7 @@
 #include "driver/mcpwm_prelude.h"
 
 static const char *TAG = "Servo";
-int angle_init = 30;
+int angle_init = 225/2;
 
 void move_servo(int angle){
     ESP_LOGI(TAG,"Create timer and operator");

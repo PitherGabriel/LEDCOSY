@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* Add custom styling */
+            body {
+                padding-top: 50px; /* Adjust as needed */
+                padding-left: 0px;
+            }
+    
+            .table-container {
+                margin-bottom: 20px;
+            }
+            /* Add margin to the right of the first table */
+            .table-container:first-child {
+            margin-right: 0px; /* Adjust the value as needed */
+            }
+    </style>
+</head>
+<body>
+    <canvas id="historicalCO2" width="600" height="400"></canvas>
+    <script>
+        var ctx = document.getElementById("historicalCO2").getContext("2d");
+        var numPointsToColorDifferently = 24; // Puedes ajustar este valor según tus necesidades
+        var linechart = new Chart (ctx,{
+            type: "line",
+            data: {
+                labels: {{labels1 | safe}},
+                datasets: [
+                    {
+                        label: " Historical CO2",
+                        data: {{values1 | safe}},
+                        fill: false,
+                        borderColor: (context) => {
+                        // Obtén el índice del punto actual
+                        var index = context.dataIndex;
+
+                        // Colorea los primeros 'numPointsToColorDifferently' puntos de manera diferente
+                        if (index < numPointsToColorDifferently) {
+                            return 'rgb(0, 0, 255)'; // Color azul para los primeros puntos
+                        } else {
+                            return 'rgb(0, 0, 0)'; // Color verde para los puntos restantes
+                        }
+                    },
+                        lineTension: 0.1
+                    }
+                    // {
+                    //     label: "Forecast CO2",
+                    //     data: {{values2 | safe}},
+                    //     fill: false,
+                    //     borderColor: "rgb(255,0,0)",
+                    //     lineTension: 0.1
+                    // } 
+                ]
+            },
+            options:{
+                responsive: false,
+                title: {
+                    display: true,
+                    text: 'Historical CO2',
+                    fontSize: 18
+                },
+                scales:{
+                    xAxes: [{
+                        tyoe: 'time',
+                        time: {
+                            unit: 'day',
+                            parser: 'YYYY-MM-DD HH:mm:ss',
+                            tooltipFormat: 'll HH:mm:ss'
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Date'
+                        }
+                    }],
+                    yAxes:[{
+                        scaleLabel:{
+                            display: true,
+                            labelString: 'CO2'
+                        }
+                    }]
+                }
+            }
+        }); 
+    </script>
+
+    <!-- <canvas id="predictedCO2" width="600" height="400"></canvas>
+    <script>
+        var ctx = document.getElementById("predictedCO2").getContext("2d");
+        var linechart = new Chart (ctx,{
+            type: "line",
+            data: {
+                labels: {{labels2 | safe}},
+                datasets: [
+                    {
+                        label: "CO2",
+                        data: {{values2 | safe}},
+                        fill: false,
+                        borderColor: "rgb(225,0,0)",
+                        lineTension: 0.1
+                    } 
+                ]
+            },
+            options:{
+                responsive: false,
+                title: {
+                    display: true,
+                    text: 'Forecasted CO2',
+                    fontSize: 18
+                }
+            }
+        }); 
+    </script> -->
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Command data -->
+        <div class="col-md-4 table-container">
+            <h2 class="mb-4">Command Data</h2>
+            <table class="table table-bordered">
+                <!-- Repeat similar structure for forecasting_data -->
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                        <th>Action</th>
+                        <th>Gain</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in commandData %}
+                        <tr>
+                            <td>{{ row.id }}</td>
+                            <td>{{ row.timestamp }}</td>
+                            <td>{{ row.action }}</td>
+                            <td>{{ row.gain }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+    <!-- Add Bootstrap JS and Popper.js scripts -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

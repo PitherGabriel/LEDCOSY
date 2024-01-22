@@ -226,10 +226,7 @@ void http_send_data(float temp, float hum, float co2)
         //puts(jsondata);
         sscanf(jsondata, "{\"action\": %d, \"gain\": %d}", action, gain);
         //printf("HEEEEEY\n");
-        //printf("Action: %d , gain:%d\n", *action, *gain);
+        printf("Action: %d , gain:%d\n", *action, *gain);
     }
     
-    
-    
-
  }

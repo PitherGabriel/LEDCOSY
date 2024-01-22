@@ -45,7 +45,7 @@ void app_main(void)
         wakeup_counter = 0;
         /*Request lighting command from server*/
         http_request_command(&action, &gain);
-        printf("Action: %d, gain: %d", action, gain);
+        //printf("Action: %d, gain: %d", action, gain);
         /*Calculate angle*/
         calculate_angle(action, gain);
         /*Move servo*/
@@ -76,7 +76,6 @@ void app_main(void)
 
 
 void wakeup_reason(){
-
     /*Chech wakeup cause*/
     switch (esp_sleep_get_wakeup_cause())
     {
@@ -95,6 +94,7 @@ void calculate_angle(int action, int gain){
     degrees = round((angle*gain)/100);
     if (action)
     {
+        printf("Increasing angle\n");
         angle +=degrees;
         if (angle>225)
         {
@@ -108,12 +108,13 @@ void calculate_angle(int action, int gain){
         angle += degrees;
     }
     
-    else 
+    else if (action==2)
     {
+        printf("Decreasing angle\n");
         angle-=degrees;
-        if (angle<195)
+        if (angle<112)
         {
-            angle=195;
+            angle=112;
         }
     }
 }
